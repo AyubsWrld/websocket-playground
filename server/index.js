@@ -7,10 +7,20 @@ const io = new Server({
 });
 
 io.on('connection', (socket) => {
-  console.log(`connect: ${socket.id}`, socket.request.headers);
+  console.log(`Connected: ${socket.id}`);
 
+  // Listen for messages from the client
+  socket.on('clientMessage', (flag) => {
+    if(flag === 1){
+      console.log("is connected")
+    }else{
+      console.log("is disconnected")
+    }
+  });
+
+  // Handle disconnection
   socket.on('disconnect', () => {
-    console.log(`disconnect: ${socket.id}`);
+    console.log(`Disconnected: ${socket.id}`);
   });
 });
 
