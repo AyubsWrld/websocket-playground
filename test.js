@@ -1,16 +1,12 @@
-let count = 0;
-const maxCount = 5;
-
-function loopWithTimeout() {
-    if (true) {
-        console.log("Count:", count);
-        count++;
-        
-        setTimeout(loopWithTimeout, 1000);
-    } else {
-        console.log("Loop completed");
-    }
+function sleepRecursive(){
+  if(true){
+    setTimeout(() => {
+      sleepRecursive()
+    }, 1000);
+    console.log("Still polling") ; 
+  }else{
+    console.log("Polling Complete")
+  }
 }
 
-// Start the loop
-loopWithTimeout();
+sleepRecursive() ; 

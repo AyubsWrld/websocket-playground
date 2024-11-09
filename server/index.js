@@ -12,9 +12,10 @@ io.on('connection', (socket) => {
   // Listen for messages from the client
   socket.on('clientMessage', (flag) => {
     if(flag === 1){
-      console.log("is connected")
+      console.log("User is Participating within the lock")
     }else{
-      console.log("is disconnected")
+      console.log("User is not Participating within the lock")
+      socket.to(socket.id).emit("serverMessage" , "Server message")
     }
   });
 

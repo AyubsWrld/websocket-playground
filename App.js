@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View , Text , Button , StyleSheet } from 'react-native' ; 
-
-import { socket } from './socket.js' ; 
-
-// Initialize the socket connection
+import { View, Text, Button, StyleSheet } from 'react-native';
+import { socket } from './socket.js';
 
 export default function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [serverMessage, setServerMessage] = useState('');
-  const [ participation , setParticipation ] = useState(false) ; 
-  const [ isPolling , setPolling ] = useState(true) ; 
+  const [isPolling, setPolling] = useState(false);
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -17,19 +13,15 @@ export default function App() {
       setIsConnected(true);
     });
 
-    // Listen for server messages
     socket.on('serverMessage', (flag) => {
-      // console.log('Message from server:', flag);
       setServerMessage(flag);
     });
 
-    // Handle disconnection
     socket.on('disconnect', () => {
       console.log('Disconnected from server');
       setIsConnected(false);
     });
 
-    // Cleanup on unmount
     return () => {
       socket.off('connect');
       socket.off('disconnect');
@@ -37,9 +29,22 @@ export default function App() {
     };
   }, []);
 
-  const sendMessageToServer = () => {
-    socket.emit('clientMessage', 'User is not participating');
-  };
+  useEffect(() => {
+    let pollInterval;
+
+    if (isPolling) {
+      const poll = () => {
+        socket.emit("clientMessage", 1);
+      };
+
+      poll(); // initial call to start polling
+      pollInterval = setInterval(poll, 1000);
+    } else {
+      console.log("Polling Complete");
+    }
+
+    return () => clearInterval(pollInterval); // Cleanup interval on unmount or stop polling
+  }, [isPolling]);
 
   const toggleConnection = () => {
     if (isConnected) {
@@ -49,17 +54,13 @@ export default function App() {
     }
   };
 
-  function polling(){
-    setPolling(isPolling => !isPolling)
-    if(isPolling && socket.connected){
-      socket.emit("clientMessage" , 1 )
-      setTimeout(() => {
-       polling()
-      }, 4000);
-    }else{
-      console.log("Polling Complete") ; 
-    }
-  }
+  const handlePolling = () => {
+    setPolling((prevIsPolling) => !prevIsPolling);
+  };
+
+  const sendMessageToServer = () => {
+    socket.emit('clientMessage', 'User is not participating');
+  };
 
   return (
     <View style={styles.container}>
@@ -71,9 +72,9 @@ export default function App() {
         color={isConnected ? 'red' : 'green'}
       />
       <Button
-        onPress={polling}
-        title={'Start Monitoring' }
-        color={'blue'}
+        onPress={handlePolling}
+        title={isPolling ? 'Stop Monitoring' : 'Start Monitoring'}
+        color={isPolling ? 'red' : 'green'}
       />
       <Button onPress={sendMessageToServer} title="Send Message" color="blue" />
     </View>
